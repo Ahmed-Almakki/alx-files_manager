@@ -1,5 +1,6 @@
 import { createHash } from 'crypto';
 import DBClient from '../utils/db';
+import redisClient from '../utils/redis';
 
 class UsersController {
   static async postNew(req, res) {
@@ -25,6 +26,19 @@ class UsersController {
       return res.status(201).send({ id: result.insertedId, email });
     }
     return 0;
+  }
+
+  static async getMe(req, res) {
+    const token = req.headers['x-token'];
+    const kkey = `auth_${token}`;
+    const result = await redisClient.get(kkey);
+    console.log(result);
+    if (result) {
+      const data = JSON.parse(result);
+      console.log(data);
+      return res.send({ id: data.id, email: data.email });
+    }
+    return res.status(401).send({ error: 'Unauthorized' });
   }
 }
 
