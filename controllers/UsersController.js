@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import { ObjectId } from 'mongodb';
 import DBClient from '../utils/db';
 import redisClient from '../utils/redis';
 
@@ -33,11 +34,12 @@ class UsersController {
       const userToken = request.header('X-Token');
       const authKey = `auth_${userToken}`;
       const userID = await redisClient.get(authKey);
-      console.log('USER KEY GET ME', userID);
       if (!userID) {
         response.status(401).json({ error: 'Unauthorized' });
       }
-      const user = await dbClient.getUser({ _id: ObjectId(userID) });
+      const user = await DBClient.client.db()
+        .collection('users')
+        .findOne({ _id: ObjectId(userID) });
       response.json({ id: user._id, email: user.email });
     } catch (error) {
       console.log(error);
