@@ -10,7 +10,7 @@ class AuthController {
       return res.status(401).send({ error: 'You aren\'t authenticated' });
     }
     const Auth = Buffer.from(authheader.split(' ')[1], 'base64')
-      .toString().split(':');
+      .toString('utf-8').split(':');
     const email = Auth[0];
     const password = Auth[1];
     const haspass = createHash('sha1').update(password).digest('hex');
@@ -20,19 +20,24 @@ class AuthController {
     if (result.email === email && result.password === haspass) {
       const uid = uuidv4();
       const KeyToken = `auth_${uid}`;
-      redisClient.set(KeyToken, result._id.toString(), 86400);
+      await redisClient.set(KeyToken, result._id.toString(), 86400);
       return res.status(200).send({ token: uid });
     }
     return res.status(401).send({ error: 'Unauthorized' });
   }
 
   static async getDisconnect(req, res) {
+    const obj = { userId: null, key: null };
     const Xtok = req.headers['x-token'];
     if (!Xtok) {
       return res.status(401).send({ error: 'Unauthorized' });
     }
-    const Keytoken = `auth_${Xtok}`;
-    const deleted = await redisClient.del(Keytoken);
+    obj.key = `auth_${Xtok}`;
+    obj.userId = await redisClient.get(obj.key);
+    if (!obj.userId) {
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+    await redisClient.del(obj.key);
     return res.status(204).send();
   }
 }

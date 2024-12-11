@@ -35,8 +35,8 @@ class UsersController {
     const result = await redisClient.get(kkey);
     if (result) {
       const data = await DBClient.client.db()
-	.collection('users')
-	.findOne({ _id: ObjectId(result) });
+        .collection('users')
+        .findOne({ _id: ObjectId(result) });
       return res.send({ id: data._id, email: data.email });
     }
     return res.status(401).send({ error: 'Unauthorized' });
