@@ -7,10 +7,7 @@ class RedisClient {
   }
 
   isAlive() {
-    if (this.clinet.isOpen) {
-      return true;
-    }
-    return false;
+    return this.clinet.connected && this.clinet.ready;
   }
 
   async get(key) {
