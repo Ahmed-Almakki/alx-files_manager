@@ -18,7 +18,7 @@ class AuthController {
       .collection('users')
       .findOne({ email, password: haspass });
     if (result.email === email && result.password === haspass) {
-      const uid = uuidv4().toString();
+      const uid = uuidv4();
       const KeyToken = `auth_${uid}`;
       redisClient.set(KeyToken, result._id.toString(), 86400);
       return res.status(200).send({ token: uid });
@@ -32,8 +32,9 @@ class AuthController {
       return res.status(401).send({ error: 'Unauthorized' });
     }
     const Keytoken = `auth_${Xtok}`;
-    await redisClient.del(Keytoken);
+    const deleted = await redisClient.del(Keytoken);
     return res.status(204).send();
   }
 }
+
 export default AuthController;
