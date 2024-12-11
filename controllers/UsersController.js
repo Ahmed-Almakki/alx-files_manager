@@ -28,17 +28,21 @@ class UsersController {
     return 0;
   }
 
-  static async getMe(req, res) {
-    const token = req.headers['x-token'];
-    const kkey = `auth_${token}`;
-    const result = await redisClient.get(kkey);
-    console.log(result);
-    if (result) {
-      const data = JSON.parse(result);
-      console.log(data);
-      return res.send({ id: data.id, email: data.email });
+  static async getMe(request, response) {
+    try {
+      const userToken = request.header('X-Token');
+      const authKey = `auth_${userToken}`;
+      const userID = await redisClient.get(authKey);
+      console.log('USER KEY GET ME', userID);
+      if (!userID) {
+        response.status(401).json({ error: 'Unauthorized' });
+      }
+      const user = await dbClient.getUser({ _id: ObjectId(userID) });
+      response.json({ id: user._id, email: user.email });
+    } catch (error) {
+      console.log(error);
+      response.status(500).json({ error: 'Server error' });
     }
-    return res.status(401).send({ error: 'Unauthorized' });
   }
 }
 
