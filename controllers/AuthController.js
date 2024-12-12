@@ -9,12 +9,7 @@ class AuthController {
     if (!authheader) {
       return res.status(401).send({ error: 'You aren\'t authenticated' });
     }
-    const check = authheader.split(' ')[1];
-    const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
-    if (!base64.regex.test(check)) {
-      return res.status(401).send({ error: 'You aren\'t authenticated' });
-    }
-    const Auth = Buffer.from(check, 'base64')
+    const Auth = Buffer.from(authheader.split(' ')[1], 'base64')
       .toString('utf-8').split(':');
     const email = Auth[0];
     const password = Auth[1];
