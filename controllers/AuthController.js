@@ -17,7 +17,10 @@ class AuthController {
     const result = await DBClient.client.db()
       .collection('users')
       .findOne({ email, password: haspass });
-    if (result && result.email === email && result.password === haspass) {
+    if (!result) {
+      return res.status(401).send({ error: 'Unauthorized' });
+    }
+    if (result.email === email && result.password === haspass) {
       const uid = uuidv4();
       const KeyToken = `auth_${uid}`;
       await redisClient.set(KeyToken, result._id.toString(), 86400);
