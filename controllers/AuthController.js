@@ -19,7 +19,7 @@ class AuthController {
 
     const Auth = decoded.split(':');
     if (Auth.length !== 2) {
-      return res.status(400).send({ error: 'Malformed authentication data' });
+      return res.status(401).send({ error: 'Unauthorized' });
     }
 
     const email = Auth[0];
