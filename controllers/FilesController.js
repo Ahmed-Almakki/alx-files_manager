@@ -19,7 +19,7 @@ class FilesController {
       name,
       type,
       parentId,
-      isPuplic,
+      isPuplic = false,
       data,
     } = req.body;
     if (!name) {
@@ -29,9 +29,9 @@ class FilesController {
       return res.status(400).send({ error: 'Missing type' });
     }
     if (!data && type !== 'folder') {
-      return res.status(400).send({ error: 'Missing Missing data' });
+      return res.status(400).send({ error: 'Missing data' });
     }
-    if (parentId) {
+    if (parentId !== 0) {
       const retriv = await DBClinet.client.db()
         .collection('files')
         .findOne({ parentId });
@@ -45,7 +45,7 @@ class FilesController {
     const doc = {
       name,
       type,
-      parentId,
+      parentId: parentId === 0 ? 'root' : parentId,
       isPuplic,
       userId,
     };
