@@ -9,8 +9,19 @@ class AuthController {
     if (!authheader) {
       return res.status(401).send({ error: 'You aren\'t authenticated' });
     }
-    const Auth = Buffer.from(authheader.split(' ')[1], 'base64')
-      .toString('utf-8').split(':');
+    let decoded;
+    try {
+      // Attempt to decode Base64
+      decoded = Buffer.from(authheader.split(' ')[1], 'base64').toString('utf-8');
+    } catch (err) {
+      return res.status(400).send({ error: 'Invalid Base64 encoding' });
+    }
+
+    const Auth = decoded.split(':');
+    if (Auth.length !== 2) {
+      return res.status(400).send({ error: 'Malformed authentication data' });
+    }
+
     const email = Auth[0];
     const password = Auth[1];
     const haspass = createHash('sha1').update(password).digest('hex');
