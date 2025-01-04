@@ -14,7 +14,7 @@ class AuthController {
       // Attempt to decode Base64
       decoded = Buffer.from(authheader.split(' ')[1], 'base64').toString('utf-8');
     } catch (err) {
-      return res.status(400).send({ error: 'Unauthorized' });
+      return res.status(401).send({ error: 'Unauthorized' });
     }
 
     const Auth = decoded.split(':');
