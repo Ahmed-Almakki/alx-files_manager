@@ -19,9 +19,10 @@ class FilesController {
       name,
       type,
       parentId,
-      isPuplic = false,
+      isPublic = false,
       data,
     } = req.body;
+
     if (!name) {
       return res.status(400).send({ error: 'Missing name' });
     }
@@ -34,8 +35,7 @@ class FilesController {
     if (parentId) {
       const retriv = await DBClinet.client.db()
         .collection('files')
-        .findOne({ parentId });
-      console.log('asdfsfsad', parentId);
+        .findOne({ _id: parentId });
       if (!retriv) {
         return res.status(400).send({ error: 'Parent not found' });
       }
@@ -43,18 +43,27 @@ class FilesController {
         return res.status(400).send({ error: 'Parent is not a folder' });
       }
     }
+
     const doc = {
       name,
       type,
-      parentId: parentId === 0 ? 'root' : parentId,
-      isPuplic,
+      parentId: parentId || 0,
+      isPublic, // Correct field name
       userId,
     };
+
     if (type === 'folder') {
-      await DBClinet.client.db()
+      const result = await DBClinet.client.db()
         .collection('files')
         .insertOne(doc);
-      return res.status(201).json({ ...doc });
+      return res.status(201).json({
+        id: result.insertedId, // Return the `id` field
+        userId,
+        name,
+        type,
+        isPublic,
+        parentId: parentId || 0,
+      });
     }
 
     const folderPath = process.env.FOLDER_PATH || '/tmp/files_manager';
@@ -73,13 +82,19 @@ class FilesController {
     }
 
     doc.localPath = filePath;
-    await DBClinet.client.db()
+    const result = await DBClinet.client.db()
       .collection('files')
       .insertOne(doc);
 
     return res.status(201).json({
-      ...doc,
+      id: result.insertedId, // Map `_id` to `id`
+      userId,
+      name,
+      type,
+      isPublic,
+      parentId: parentId || 0,
     });
   }
 }
+
 export default FilesController;
