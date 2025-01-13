@@ -31,10 +31,11 @@ class FilesController {
     if (!data && type !== 'folder') {
       return res.status(400).send({ error: 'Missing data' });
     }
-    if (parentId !== 0) {
+    if (parentId) {
       const retriv = await DBClinet.client.db()
         .collection('files')
         .findOne({ parentId });
+      console.log('asdfsfsad', parentId);
       if (!retriv) {
         return res.status(400).send({ error: 'Parent not found' });
       }
